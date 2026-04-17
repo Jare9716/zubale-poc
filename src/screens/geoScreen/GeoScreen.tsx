@@ -16,7 +16,7 @@ import {
 	shareSessionAsText,
 } from "./helper";
 
-import { FilledButton } from "@/components/button";
+import { FilledButton } from "@/components";
 
 function GeoScreen() {
 	const subscriptions = useRef<Subscription[]>([]);

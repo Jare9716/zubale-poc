@@ -42,9 +42,12 @@ export async function printSession(): Promise<void> {
 	locations.forEach((loc, i) =>
 		console.log(formatLocationLine(loc, i, locations.length)),
 	);
-	const summary = locations.length === 0
-		? "No locations recorded."
-		: locations.map((loc, i) => formatLocationLine(loc, i, locations.length)).join("\n");
+	const summary =
+		locations.length === 0
+			? "No locations recorded."
+			: locations
+					.map((loc, i) => formatLocationLine(loc, i, locations.length))
+					.join("\n");
 	simpleAlert(`Session (${locations.length} locations)`, summary);
 }
 

@@ -4,7 +4,7 @@ import { Modal, StyleSheet, Text, View, Pressable } from "react-native";
 import { useCameraPermissions } from "expo-camera";
 import { BarCodeScanner } from "./components/BarCodeScanner";
 
-import { FilledButton } from "@/components/button";
+import { FilledButton } from "@/components";
 
 function CameraScreen() {
 	const [permission, requestPermission] = useCameraPermissions();
