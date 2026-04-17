@@ -70,6 +70,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6151ab50-6cd7-4b6c-aecd-d4065d8eace2"
+      }
+    },
+    "owner": "mrblonde97"
   }
 }
