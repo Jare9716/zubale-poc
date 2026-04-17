@@ -3,6 +3,7 @@ import BackgroundGeolocation, {
 } from "react-native-background-geolocation";
 import { File, Paths } from "expo-file-system";
 import { shareAsync, isAvailableAsync } from "expo-sharing";
+import { simpleAlert } from "@/utils/alerts";
 
 export const GEO_CONFIG = {
 	geolocation: {
@@ -41,11 +42,15 @@ export async function printSession(): Promise<void> {
 	locations.forEach((loc, i) =>
 		console.log(formatLocationLine(loc, i, locations.length)),
 	);
+	const summary = locations.length === 0
+		? "No locations recorded."
+		: locations.map((loc, i) => formatLocationLine(loc, i, locations.length)).join("\n");
+	simpleAlert(`Session (${locations.length} locations)`, summary);
 }
 
 export async function clearDB(): Promise<void> {
 	await BackgroundGeolocation.destroyLocations();
-	console.log("[clearDB] database cleared");
+	simpleAlert("DB", "Database cleared.");
 }
 
 export async function toggleTracking(): Promise<boolean> {
@@ -63,7 +68,7 @@ export async function toggleTracking(): Promise<boolean> {
 export async function shareSessionAsText(): Promise<void> {
 	const locations = (await BackgroundGeolocation.getLocations()) as Location[];
 	if (locations.length === 0) {
-		console.log("[share] no locations to share");
+		simpleAlert("Share", "No locations to share.");
 		return;
 	}
 
@@ -78,6 +83,7 @@ export async function shareSessionAsText(): Promise<void> {
 
 	if (!(await isAvailableAsync())) {
 		console.warn("[share] Sharing not available on this device");
+		simpleAlert("Share", "Sharing is not available on this device.");
 		return;
 	}
 	await shareAsync(file.uri, {
