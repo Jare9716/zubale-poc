@@ -5,6 +5,8 @@ import BackgroundGeolocation, {
 	Subscription,
 } from "react-native-background-geolocation";
 
+import { simpleAlert } from "@/utils/alerts";
+
 import {
 	GEO_CONFIG,
 	formatLocationLine,
@@ -13,6 +15,8 @@ import {
 	toggleTracking,
 	shareSessionAsText,
 } from "./helper";
+
+import { FilledButton } from "@/components/button";
 
 function GeoScreen() {
 	const subscriptions = useRef<Subscription[]>([]);
@@ -32,7 +36,7 @@ function GeoScreen() {
 				setIsTracking(state.enabled);
 				console.log("[ready] SDK configured, enabled:", state.enabled);
 			})
-			.catch((error) => console.error("[ready] error:", error));
+			.catch((error) => simpleAlert("[ready] error:", error));
 
 		return () => subs.forEach((s) => s.remove());
 	}, []);
@@ -72,23 +76,26 @@ function GeoScreen() {
 	return (
 		<View style={styles.container}>
 			<Text style={styles.status}>Tracking: {isTracking ? "ON" : "OFF"}</Text>
-			<Pressable style={styles.button} onPress={onToggleTracking}>
-				<Text style={styles.buttonText}>
-					{isTracking ? "Stop Tracking" : "Start Tracking"}
-				</Text>
-			</Pressable>
-			<Pressable style={styles.button} onPress={onPrintSession}>
-				<Text style={styles.buttonText}>Print Session</Text>
-			</Pressable>
-			<Pressable style={styles.button} onPress={onShareSession}>
-				<Text style={styles.buttonText}>Share Session</Text>
-			</Pressable>
-			<Pressable
-				style={[styles.button, styles.dangerButton]}
+			<FilledButton
+				title={isTracking ? "Stop Tracking" : "Start Tracking"}
+				onPress={onToggleTracking}
+				style={styles.button}
+			/>
+			<FilledButton
+				title="Print Session"
+				onPress={onPrintSession}
+				style={styles.button}
+			/>
+			<FilledButton
+				title="Share Session"
+				onPress={onShareSession}
+				style={styles.button}
+			/>
+			<FilledButton
+				title="Clear DB"
 				onPress={onClearDB}
-			>
-				<Text style={styles.buttonText}>Clear DB</Text>
-			</Pressable>
+				style={[styles.button, styles.dangerButton]}
+			/>
 		</View>
 	);
 }

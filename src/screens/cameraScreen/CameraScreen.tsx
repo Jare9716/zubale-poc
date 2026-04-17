@@ -4,6 +4,8 @@ import { Modal, StyleSheet, Text, View, Pressable } from "react-native";
 import { useCameraPermissions } from "expo-camera";
 import { BarCodeScanner } from "./components/BarCodeScanner";
 
+import { FilledButton } from "@/components/button";
+
 function CameraScreen() {
 	const [permission, requestPermission] = useCameraPermissions();
 
@@ -20,9 +22,11 @@ function CameraScreen() {
 					We need your permission to show the camera
 				</Text>
 				<View style={styles.buttonsContainer}>
-					<Pressable style={styles.button} onPress={requestPermission}>
-						<Text style={styles.buttonText}>Grant Permission</Text>
-					</Pressable>
+					<FilledButton
+						title="Grant Permission"
+						onPress={requestPermission}
+						style={styles.button}
+					/>
 				</View>
 			</View>
 		);
@@ -31,12 +35,11 @@ function CameraScreen() {
 	return (
 		<View style={styles.container}>
 			<View style={styles.buttonsContainer}>
-				<Pressable
-					style={styles.button}
+				<FilledButton
+					title="Bar Code Scanner"
 					onPress={() => setOpenBarCodeScanner(true)}
-				>
-					<Text style={styles.buttonText}>Bar Code Scanner</Text>
-				</Pressable>
+					style={styles.button}
+				/>
 			</View>
 			<Modal
 				animationType="fade"
