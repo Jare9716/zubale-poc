@@ -1,9 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Pressable } from "react-native";
 
 import BackgroundGeolocation, {
 	Subscription,
 } from "react-native-background-geolocation";
+
+import {
+	GEO_CONFIG,
+	formatLocationLine,
+	printSession,
+	clearDB,
+	toggleTracking,
+	shareSessionAsText,
+} from "./helper";
 
 function GeoScreen() {
 	const subscriptions = useRef<Subscription[]>([]);
@@ -12,64 +21,74 @@ function GeoScreen() {
 	useEffect(() => {
 		const subs = subscriptions.current;
 
-		// Register event listeners *before* calling ready()
 		subs.push(
 			BackgroundGeolocation.onLocation((location) => {
-				console.log("[onLocation]", location);
+				console.log(`[onLocation] ${formatLocationLine(location)}`);
 			}),
 		);
 
-		// ready() configures the SDK and restores persisted state.
-		// It does NOT start tracking — call start()/stop() separately.
-		BackgroundGeolocation.ready({
-			geolocation: {
-				desiredAccuracy: BackgroundGeolocation.DesiredAccuracy.High,
-				distanceFilter: 10,
-			},
-			app: {
-				stopOnTerminate: false,
-				startOnBoot: true,
-			},
-			logger: {
-				debug: true,
-				logLevel: BackgroundGeolocation.LogLevel.Verbose,
-			},
-		})
+		BackgroundGeolocation.ready(GEO_CONFIG)
 			.then((state) => {
 				setIsTracking(state.enabled);
 				console.log("[ready] SDK configured, enabled:", state.enabled);
 			})
-			.catch((error) => {
-				console.error("[ready] error:", error);
-			});
+			.catch((error) => console.error("[ready] error:", error));
 
 		return () => subs.forEach((s) => s.remove());
 	}, []);
 
+	const onPrintSession = async () => {
+		try {
+			await printSession();
+		} catch (e) {
+			console.error("[printSession] error:", e);
+		}
+	};
+
+	const onClearDB = async () => {
+		try {
+			await clearDB();
+		} catch (e) {
+			console.error("[clearDB] error:", e);
+		}
+	};
+
 	const onToggleTracking = async () => {
 		try {
-			const state = await BackgroundGeolocation.getState();
-			if (state.enabled) {
-				await BackgroundGeolocation.stop();
-				setIsTracking(false);
-				console.log("[stop] tracking stopped");
-			} else {
-				await BackgroundGeolocation.start();
-				setIsTracking(true);
-				console.log("[start] tracking started");
-			}
-		} catch (error) {
-			console.error("[toggleTracking] error:", error);
+			setIsTracking(await toggleTracking());
+		} catch (e) {
+			console.error("[toggleTracking] error:", e);
+		}
+	};
+
+	const onShareSession = async () => {
+		try {
+			await shareSessionAsText();
+		} catch (e) {
+			console.error("[shareSession] error:", e);
 		}
 	};
 
 	return (
 		<View style={styles.container}>
 			<Text style={styles.status}>Tracking: {isTracking ? "ON" : "OFF"}</Text>
-			<Button
-				title={isTracking ? "Stop Tracking" : "Start Tracking"}
-				onPress={onToggleTracking}
-			/>
+			<Pressable style={styles.button} onPress={onToggleTracking}>
+				<Text style={styles.buttonText}>
+					{isTracking ? "Stop Tracking" : "Start Tracking"}
+				</Text>
+			</Pressable>
+			<Pressable style={styles.button} onPress={onPrintSession}>
+				<Text style={styles.buttonText}>Print Session</Text>
+			</Pressable>
+			<Pressable style={styles.button} onPress={onShareSession}>
+				<Text style={styles.buttonText}>Share Session</Text>
+			</Pressable>
+			<Pressable
+				style={[styles.button, styles.dangerButton]}
+				onPress={onClearDB}
+			>
+				<Text style={styles.buttonText}>Clear DB</Text>
+			</Pressable>
 		</View>
 	);
 }
@@ -80,11 +99,28 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent: "center",
-		alignItems: "center",
 		gap: 16,
+		paddingHorizontal: 16,
+		backgroundColor: "white",
 	},
 	status: {
+		textAlign: "center",
 		fontSize: 18,
 		fontWeight: "600",
+	},
+	button: {
+		justifyContent: "center",
+		alignItems: "center",
+		height: 48,
+		backgroundColor: "darkblue",
+		borderRadius: 8,
+	},
+	buttonText: {
+		color: "white",
+		fontSize: 16,
+		fontWeight: "bold",
+	},
+	dangerButton: {
+		backgroundColor: "darkred",
 	},
 });
